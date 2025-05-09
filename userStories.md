@@ -134,3 +134,5 @@
 
 - **Implementación**: La tabla Reservas tiene los atributos `id_delegacion_recogida` e `id_delegacion_devolucion`, que referencian el `id_delegacion` de la tabla Delegaciones.
 
+## Data Flow:
+
