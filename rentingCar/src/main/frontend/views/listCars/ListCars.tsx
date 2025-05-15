@@ -22,7 +22,12 @@ export default function ListCars() {
           (car): car is Car =>
             !!car &&
             typeof car.delegationId === 'string' &&
-            typeof car.operation === 'string'
+            typeof car.operation === 'string' &&
+            typeof car.make === 'string' &&
+            typeof car.model === 'string' &&
+            typeof car.year === 'number' &&
+            typeof car.price === 'number' &&
+            typeof car.rented === 'boolean'
         );
         setCars(safeCars);
       })
@@ -34,7 +39,7 @@ export default function ListCars() {
   }, []);
 
   const handleBook = async (car: Car) => {
-    const userId = "USER#001";
+    const userId = getUserId(); // Replace with a function or state that retrieves the actual user ID
     try {
       const idHashBookingCar = await generateBookingHash({
         make: car.make ?? '',
@@ -56,10 +61,16 @@ export default function ListCars() {
     const encoder = new TextEncoder();
     const dateString = new Date().toISOString().split('T')[0];
     const stringToHash = `${data.make}-${data.model}-${dateString}-${data.userId}`;
-    const hashBuffer = await crypto.subtle.digest(
-      'SHA-256',
-      encoder.encode(stringToHash)
-    );
+    let hashBuffer;
+    try {
+      hashBuffer = await crypto.subtle.digest(
+        'SHA-256',
+        encoder.encode(stringToHash)
+      );
+    } catch (error) {
+      console.error('Error generating hash:', error);
+      throw new Error('Failed to generate booking hash');
+    }
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
@@ -89,7 +100,7 @@ export default function ListCars() {
       {cars
         .filter(isCarWithMakeAndModel)
         .map(car => {
-          const nombreImagen = `${car.make}_${car.model}`.replace(/\s+/g, '_') + ".jpg";
+          const nombreImagen = `${car.make}_${car.model}`.replace(/\s+/g, '_') + ".webp";
           return (
             <div
               key={`${car.delegationId}-${car.operation}`}
@@ -106,8 +117,8 @@ export default function ListCars() {
               }}
             >
               <img
-                src={`src/main/frontend/public/img/${nombreImagen}`}
-                alt={`${car.make} ${car.model}`}
+                src={`/img/${nombreImagen}`}
+                alt={`${car.make ?? 'Unknown Make'} ${car.model ?? 'Unknown Model'}`}
                 style={{
                   width: '100%',
                   height: '180px',
