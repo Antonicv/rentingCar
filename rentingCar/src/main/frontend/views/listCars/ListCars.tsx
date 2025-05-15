@@ -10,6 +10,23 @@ export const config: ViewConfig = {
   title: 'Book a car',
 };
 
+// Función para eliminar acentos y diacríticos
+function normalizarTexto(texto: string) {
+  return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+const imgStyle = {
+  width: '100%',
+  height: '180px',
+  objectFit: 'cover',
+  borderRadius: '8px',
+  marginBottom: '1rem'
+};
+
+function handleImgError(e: React.SyntheticEvent<HTMLImageElement, Event>) {
+  e.currentTarget.src = 'https://placehold.co/300x180?text=Car+Not+Found';
+}
+
 export default function ListCars() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +56,7 @@ export default function ListCars() {
   }, []);
 
   const handleBook = async (car: Car) => {
-    const userId = getUserId(); // Replace with a function or state that retrieves the actual user ID
+    const userId = "USER#001"; // Sustituye por la lógica real para obtener el usuario
     try {
       const idHashBookingCar = await generateBookingHash({
         make: car.make ?? '',
@@ -100,7 +117,8 @@ export default function ListCars() {
       {cars
         .filter(isCarWithMakeAndModel)
         .map(car => {
-          const nombreImagen = `${car.make}_${car.model}`.replace(/\s+/g, '_') + ".webp";
+          // Normaliza marca y modelo para formar el nombre de la imagen sin acentos
+          const nombreImagen = `${normalizarTexto(car.make)}_${normalizarTexto(car.model)}.webp`;
           return (
             <div
               key={`${car.delegationId}-${car.operation}`}
@@ -117,18 +135,10 @@ export default function ListCars() {
               }}
             >
               <img
-                src={`/img/${nombreImagen}`}
+                src={`/images/${nombreImagen}`}
                 alt={`${car.make ?? 'Unknown Make'} ${car.model ?? 'Unknown Model'}`}
-                style={{
-                  width: '100%',
-                  height: '180px',
-                  objectFit: 'cover',
-                  borderRadius: '8px',
-                  marginBottom: '1rem'
-                }}
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://placehold.co/300x180?text=Car+Not+Found';
-                }}
+                style={imgStyle}
+                onError={handleImgError}
               />
               <h3>
                 {car.make} {car.model}
