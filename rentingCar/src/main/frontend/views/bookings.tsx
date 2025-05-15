@@ -52,7 +52,7 @@ export default function Bookings() {
         <GridColumn path="statusBooking" header="Booking Status" />
         <GridColumn path="statusPayment" header="Payment Status" />
         <GridColumn
-          header="Total (€)"
+          header="Total (Pts)"
           renderer={({ item }) => item.totalToPayment?.toFixed(2) ?? '0.00'}
         />
       </Grid>

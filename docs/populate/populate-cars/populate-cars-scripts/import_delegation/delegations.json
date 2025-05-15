@@ -1,0 +1,62 @@
+[
+  {
+    "delegationId": "DELEG#001",
+    "operation": "profile",
+    "name": "Viuda de Agapito e Hijas - Yecla",
+    "city": "Yecla",
+    "adress": "Calle de San Francisco, 15",
+    "telf": 968791234,
+    "carQuantity": 6,
+    "manager": "Herminia",
+    "long": -1.1167,
+    "lat": 38.6167
+  },
+  {
+    "delegationId": "DELEG#002",
+    "operation": "profile",
+    "name": "Viuda de Agapito e Hijas - Orcera",
+    "city": "Orcera",
+    "adress": "Plaza Mayor, 3",
+    "telf": 953437589,
+    "carQuantity": 6,
+    "manager": "Zoila Vaca Querrie",
+    "long": -2.5500,
+    "lat": 38.4667
+  },
+  {
+    "delegationId": "DELEG#003",
+    "operation": "profile",
+    "name": "Viuda de Agapito e Hijas - Despeñaperros",
+    "city": "Santa Elena",
+    "adress": "Carretera de Madrid, Km 243",
+    "telf": 953664477,
+    "carQuantity": 6,
+    "manager": "Alan Brito Delgado",
+    "long": -3.5286,
+    "lat": 38.3500
+  },
+  {
+    "delegationId": "DELEG#004",
+    "operation": "profile",
+    "name": "Viuda de Agapito e Hijas - Cornellà",
+    "city": "Cornellà de Llobregat",
+    "adress": "Avenida de la Fama, 2",
+    "telf": 934740011,
+    "carQuantity": 6,
+    "manager": "Teovaldo Martinez Martinez",
+    "long": 2.0769,
+    "lat": 41.3514
+  },
+  {
+    "delegationId": "DELEG#005",
+    "operation": "profile",
+    "name": "Viuda de Agapito e Hijas - Guarromán",
+    "city": "Guarromán",
+    "adress": "Calle Real, 56",
+    "telf": 953678192,
+    "carQuantity": 6,
+    "manager": "Mario Neta Gomez",
+    "long": -3.6000,
+    "lat": 38.2333
+  }
+]
