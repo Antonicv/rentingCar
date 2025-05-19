@@ -131,7 +131,7 @@ export default function ListCars() {
                 flexDirection: 'column',
                 alignItems: 'center',
                 padding: '1.5rem',
-                background: '#f1ddaa'
+                
               }}
             >
               <img

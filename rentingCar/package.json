@@ -28,7 +28,7 @@
     "proj4": "2.15.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-router": "7.2.0",
+    "react-router": "^7.6.0",
     "react-router-dom": "^7.5.3"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "strip-css-comments": "5.0.0",
     "transform-ast": "2.4.4",
     "typescript": "5.7.3",
-    "vite": "6.2.6",
+    "vite": "^6.3.5",
     "vite-plugin-checker": "0.8.0",
     "workbox-build": "7.3.0",
     "workbox-core": "7.3.0",
@@ -125,7 +125,7 @@
       "workbox-core": "7.3.0",
       "workbox-precaching": "7.3.0"
     },
-    "hash": "679a51f61e71a9d6b1fd91da555e7a85f6c366653a6fbcfb842c16577071f50b"
+    "hash": "41758c97c83bda5d838695cbfaf76eeaa1ae0a454d9728787a944cd8c1a09e67"
   },
   "overrides": {
     "@vaadin/bundles": "$@vaadin/bundles",

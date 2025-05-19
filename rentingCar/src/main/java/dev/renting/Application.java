@@ -12,6 +12,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * and some desktop browsers.
  *
  */
+/*@Theme(value = "my-theme") // o el nom del teu tema
+public class App implements AppShellConfigurator {}*/
+
 @SpringBootApplication
 @Theme(value = "carrenting")
 public class Application implements AppShellConfigurator {
