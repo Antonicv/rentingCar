@@ -1,44 +1,82 @@
 import { ViewConfig } from '@vaadin/hilla-file-router/types.js';
 import { useEffect, useState } from 'react';
-import { DelegationEndpoint } from 'Frontend/generated/endpoints';
+import { DelegationEndpoint, ImageEndpoint } from 'Frontend/generated/endpoints';
 import Car from 'Frontend/generated/dev/renting/delegations/Car';
 import { Button } from '@vaadin/react-components/Button';
 import { useNavigate } from 'react-router-dom';
-//import { useNavigate } from '@vaadin/hilla-file-router/react';
-
 
 export const config: ViewConfig = {
   menu: { order: 6, icon: 'line-awesome/svg/car-side-solid.svg' },
   title: 'Book a car',
 };
 
+interface LocalCarImage {
+  make: string;
+  model: string;
+  url: string;
+  isClassic: boolean;
+}
+
 export default function ListCars() {
   const [cars, setCars] = useState<Car[]>([]);
+  const [localImages, setLocalImages] = useState<LocalCarImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isVintageMode, setIsVintageMode] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    DelegationEndpoint.getAllCars()
-      .then((result) => {
-        const safeCars = (result ?? []).filter(
+    const fetchData = async () => {
+      try {
+        // Load cars from API
+        const apiCars = await DelegationEndpoint.getAllCars();
+        const safeApiCars = (apiCars ?? []).filter(
           (car): car is Car =>
             !!car &&
             typeof car.delegationId === 'string' &&
             typeof car.operation === 'string'
         );
-        setCars(safeCars);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch cars:', error);
+        setCars(safeApiCars);
+
+        // Fetch image filenames from ImageEndpoint
+        const imageFilenames = await ImageEndpoint.getCarImageFilenames();
+        const classicCars = imageFilenames.map(filename => {
+          // Parse Marca_Modelo.webp (e.g., Citroen_Dyane.webp)
+          const [make, model] = filename.replace('.webp', '').split('_');
+          return {
+            make: make || 'Unknown',
+            model: model || 'Unknown',
+            url: `/images/${filename}`,
+            isClassic: true
+          };
+        });
+
+        setLocalImages(classicCars);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
         setCars([]);
-      })
-      .finally(() => setLoading(false));
+        setLocalImages([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Check for vintage mode and update state
+    const checkVintageMode = () => {
+      setIsVintageMode(document.documentElement.classList.contains('vintage-mode'));
+    };
+
+    checkVintageMode();
+    const observer = new MutationObserver(checkVintageMode);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => observer.disconnect();
   }, []);
 
   const handleBook = async (car: Car) => {
     const userId = "USER#001";
     try {
-      // Fix: Use ?? '' to avoid undefined errors
       const idHashBookingCar = await generateBookingHash({
         make: car.make ?? '',
         model: car.model ?? '',
@@ -71,13 +109,46 @@ export default function ListCars() {
     return typeof car.make === 'string' && typeof car.model === 'string';
   }
 
+  const getCarImageUrl = (car: Car) => {
+    // Check for local classic car image
+    const localImage = localImages.find(img =>
+      img.make.toLowerCase() === car.make?.toLowerCase() &&
+      img.model.toLowerCase() === car.model?.toLowerCase()
+    );
+
+    if (localImage) {
+      return localImage.url;
+    }
+
+    // Use API for non-classic cars
+    const colorParam = car.color ? `&paintId=${encodeURIComponent(car.color)}` : '';
+    return `https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make ?? '')}&modelFamily=${encodeURIComponent(car.model?.split(' ')[0] ?? '')}${colorParam}&zoomType=fullscreen`;
+  };
+
   if (loading) {
     return <div>Loading cars...</div>;
   }
 
-  if (cars.length === 0) {
+  if (cars.length === 0 && localImages.length === 0) {
     return <div>No cars available.</div>;
   }
+
+  // Combine and filter cars based on mode
+  const combinedCars = isVintageMode
+    ? localImages.map(img => ({
+        delegationId: `local-${img.make}-${img.model}`,
+        make: img.make,
+        model: img.model,
+        color: 'Various',
+        year: 0,
+        price: 0,
+        rented: false,
+        operation: 'classic'
+      } as Car))
+    : cars.filter(car => !localImages.some(img =>
+        img.make.toLowerCase() === car.make?.toLowerCase() &&
+        img.model.toLowerCase() === car.model?.toLowerCase()
+      ));
 
   return (
     <div
@@ -89,7 +160,7 @@ export default function ListCars() {
         padding: '2rem'
       }}
     >
-      {cars
+      {combinedCars
         .filter(isCarWithMakeAndModel)
         .map(car => (
           <div
@@ -107,7 +178,7 @@ export default function ListCars() {
             }}
           >
             <img
-              src={`https://cdn.imagin.studio/getimage?customer=img&make=${encodeURIComponent(car.make)}&modelFamily=${encodeURIComponent(car.model.split(' ')[0])}&zoomType=fullscreen`}
+              src={getCarImageUrl(car)}
               alt={`${car.make} ${car.model}`}
               style={{
                 width: '100%',
@@ -121,23 +192,23 @@ export default function ListCars() {
               }}
             />
             <h3>
-              {car.make} {car.model}
+              {car.make} {car.model} {car.operation === 'classic' ? '(Classic)' : ''}
             </h3>
             <div style={{ marginBottom: '0.5rem', color: '#555' }}>
-              Year: <strong>{car.year}</strong>
+              Year: <strong>{car.year === 0 ? 'N/A' : car.year}</strong>
             </div>
             <div style={{ marginBottom: '0.5rem', color: '#555' }}>
-              Color: <strong>{car.color}</strong>
+              Color: <strong>{car.color === 'Various' ? 'N/A' : car.color}</strong>
             </div>
             <div style={{ marginBottom: '0.5rem', color: '#555' }}>
-              Price: <strong>{car.price} €</strong>
+              Price: <strong>{car.price === 0 ? 'N/A' : `${car.price} ${car.operation === 'classic' ? 'Pts' : '€'}`}</strong>
             </div>
             <div style={{ marginBottom: '1rem', color: car.rented ? '#d33' : '#090' }}>
               {car.rented ? 'Rented' : 'Available'}
             </div>
             <Button
               theme="primary"
-              disabled={car.rented}
+              disabled={car.rented || car.operation === 'classic'}
               onClick={() => handleBook(car)}
               style={{ width: '100%' }}
             >

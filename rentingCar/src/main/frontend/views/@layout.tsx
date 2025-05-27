@@ -1,7 +1,7 @@
 import { createMenuItems, useViewConfig } from '@vaadin/hilla-file-router/runtime.js';
 import { effect, signal } from '@vaadin/hilla-react-signals';
 import { AppLayout, DrawerToggle, Icon, SideNav, SideNavItem } from '@vaadin/react-components';
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 
 const documentTitleSignal = signal('');
@@ -16,12 +16,26 @@ export default function MainLayout() {
   const currentTitle = useViewConfig()?.title;
   const navigate = useNavigate();
   const location = useLocation();
+  const [isDarkMode, setIsDarkMode] = useState(document.documentElement.hasAttribute('theme'));
 
   useEffect(() => {
     if (currentTitle) {
       documentTitleSignal.value = currentTitle;
     }
   }, [currentTitle]);
+
+  const toggleDarkMode = () => {
+    if (isDarkMode) {
+      document.documentElement.removeAttribute('theme');
+    } else {
+      document.documentElement.setAttribute('theme', 'dark');
+    }
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const toggleVintageMode = () => {
+    document.documentElement.classList.toggle('vintage-mode');
+  };
 
   return (
     <AppLayout primarySection="drawer">
@@ -39,10 +53,24 @@ export default function MainLayout() {
         </header>
       </div>
 
-      <DrawerToggle slot="navbar" aria-label="Menu toggle"></DrawerToggle>
-      <h1 slot="navbar" className="text-l m-0">
-        {documentTitleSignal}
-      </h1>
+      <div slot="navbar" className="navbar-custom">
+        <DrawerToggle slot="navbar" aria-label="Menu toggle"></DrawerToggle>
+        <h1 className="navbar-title">{documentTitleSignal}</h1>
+        <div className="flex gap-m">
+          <button
+            className="theme-toggle-btn"
+            onClick={toggleDarkMode}
+          >
+            {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+          </button>
+          <button
+            className="vintage-toggle-btn"
+            onClick={toggleVintageMode}
+          >
+            Vintage Mode
+          </button>
+        </div>
+      </div>
 
       <Suspense>
         <Outlet />
